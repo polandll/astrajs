@@ -4,7 +4,7 @@ const axios = require("axios");
 const _ = require("lodash");
 
 const REQUESTED_WITH = "@astrajs/rest";
-const AUTH_PATH = "/v1/auth";
+const AUTH_PATH = "/api/rest/v1/auth";
 const DEFAULT_METHOD = "get";
 const DEFAULT_TIMEOUT = 10000;
 const HTTP_METHODS = {
@@ -23,7 +23,7 @@ const HTTP_METHODS = {
  * @param {string} options.astraDatabaseRegion The region of your Astra database
  * @param {string} options.username Reconnect using the provided credentials
  * @param {string} options.password Reconnect using the provided credentials
- * @param {string} [options.baseUrl] The url of your Stargate instance for auth query
+ * @param {string} [options.baseUrl] The url of your Stargate instance
  * @param {string} [options.authToken] A valid stargate/Asta auth token
  * @param {string} [options.autoReconnect] Reconnect using the provided credentials
  * @param {Function} [options.getAuthToken] A function that returns a promise which returns a valid authToken, for reading tokens from shared storage
@@ -193,7 +193,7 @@ class AstraClient {
    */
   async get(path, options) {
     return await this._request({
-      url: `http://localhost:8082` + path,
+      url: this.baseUrl + path,
       method: HTTP_METHODS.get,
       ...options,
     });
@@ -211,7 +211,7 @@ class AstraClient {
    */
   async post(path, data, options) {
     return await this._request({
-      url: `http://localhost:8082` + path,
+      url: this.baseUrl + path,
       method: HTTP_METHODS.post,
       data,
       ...options,
@@ -230,7 +230,7 @@ class AstraClient {
    */
   async put(path, data, options) {
     return await this._request({
-      url: `http://localhost:8082` + path,
+      url: this.baseUrl + path,
       method: HTTP_METHODS.put,
       data,
       ...options,
@@ -249,7 +249,7 @@ class AstraClient {
    */
   async patch(path, data, options) {
     return await this._request({
-      url: `http://localhost:8082` + path,
+      url: this.baseUrl + path,
       method: HTTP_METHODS.patch,
       data,
       ...options,
@@ -267,7 +267,7 @@ class AstraClient {
    */
   async delete(path, options) {
     return await this._request({
-      url: `http://localhost:8082` + path,
+      url: this.baseUrl + path,
       method: HTTP_METHODS.delete,
       ...options,
     });

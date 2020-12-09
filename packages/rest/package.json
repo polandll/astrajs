@@ -30,6 +30,7 @@
     "url": "https://github.com/kidrecursive/astrajs/issues"
   },
   "dependencies": {
+    "@astrajs/collections": "0.0.7",
     "axios": "^0.20.0",
     "lodash": "^4.17.20"
   },

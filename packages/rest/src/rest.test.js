@@ -2,82 +2,104 @@
 
 const assert = require("assert");
 const faker = require("faker");
-const astraRest = require("./rest");
+const sgRest = require("./rest");
 const _ = require("lodash");
 
 // setup envars
 require("dotenv").config();
 
 describe("AstraJS", () => {
-  describe("Astra REST Client", () => {
-    it("should initialize an Astra REST Client", async () => {
-      const astraClient = await astraRest.createClient({
-        astraDatabaseId: process.env.ASTRA_DB_ID,
-        astraDatabaseRegion: process.env.ASTRA_DB_REGION,
-        username: process.env.ASTRA_DB_USERNAME,
-        password: process.env.ASTRA_DB_PASSWORD,
+  describe("SG REST Client", () => {
+    it("should initialize an SG REST Client", async () => {
+      const sgClient = await sgRest.createClient({
+        username: process.env.STARGATE_DB_USERNAME,
+        password: process.env.STARGATE_DB_PASSWORD,
+        baseUrl: process.env.STARGATE_BASE_URL,
+	debug: process.env.DEBUG
       });
 
-      assert.notEqual(astraClient, null);
+      assert.notEqual(sgClient, null);
     });
   });
 
-  describe("Astra Document API", () => {
+  describe("SG Document API", () => {
     // setup test context
-    let astraClient = null;
-    const namespace = process.env.ASTRA_DB_KEYSPACE;
-    const collection = "rest";
+    let sgClient = null;
+    //const namespace = process.env.STARGATE_DB_KEYSPACE;
+    const namespace = "myworld";
+    const collection = "fitness";
     const documentId = faker.random.alphaNumeric(8);
-    const collectionsPath = `/api/rest/v2/namespaces/${namespace}/collections/${collection}`;
+    const collectionsPath = `/v2/namespaces/${namespace}/collections/${collection}`;
     const documentPath = `${collectionsPath}/${documentId}`;
 
     before(async () => {
-      astraClient = await astraRest.createClient({
-        astraDatabaseId: process.env.ASTRA_DB_ID,
-        astraDatabaseRegion: process.env.ASTRA_DB_REGION,
-        username: process.env.ASTRA_DB_USERNAME,
-        password: process.env.ASTRA_DB_PASSWORD,
+      sgClient = await sgRest.createClient({
+        username: process.env.STARGATE_DB_USERNAME,
+        password: process.env.STARGATE_DB_PASSWORD,
+        baseUrl: process.env.STARGATE_BASE_URL,
+	debug: process.env.DEBUG
       });
     });
 
-    it("should PUT a document", async () => {
-      await astraClient.put(documentPath, {
+    it("should POST a document", async () => {
+      await sgClient.post(documentPath, {
         firstName: "Cliff",
         lastName: "Wicklow",
-        emails: ["cliff.wicklow@example.com"],
+	emails: ["cliff.wicklow@example.com"]
       });
-
-      const res = await astraClient.get(documentPath);
+      const res = await sgClient.get(documentPath);
       assert.equal(res.data.firstName, "Cliff");
       assert.equal(res.data.emails[0], "cliff.wicklow@example.com");
     });
 
+    it("should PUT a document", async () => {
+      await sgClient.put(documentPath, {
+        firstName: "Cliff",
+        lastName: "Wicklow",
+        emails: ["cliff.wicklow@example.com"]
+      });
+      const res = await sgClient.get(documentPath);
+      assert.equal(res.data.firstName, "Cliff");
+      assert.equal(res.data.emails[0], "cliff.wicklow@example.com");
+    });
+
+    it("should PUT a document", async () => {
+      await sgClient.put(documentPath, {
+        firstName: "Roger",
+        lastName: "Dodger",
+        emails: ["rodger.Dodger@example.com"]
+      });
+
+      const res = await sgClient.get(documentPath);
+      assert.equal(res.data.firstName, "Roger");
+    });
+
     it("should PUT to a subdocument", async () => {
-      await astraClient.put(`${documentPath}/addresses`, {
-        home: {
-          city: "New York",
-          state: "NY",
+      await sgClient.put(`${documentPath}/addresses`, {
+        "home": {
+          "city": "New York",
+          "state": "NY",
         },
       });
 
-      const res = await astraClient.get(`${documentPath}/addresses`);
+      const res = await sgClient.get(`${documentPath}/addresses`);
       assert.equal(res.data.home.city, "New York");
     });
 
     it("should PATCH a document", async () => {
-      await astraClient.patch(`${documentPath}/addresses`, {
-        home: {
-          city: "Buffalo",
+      await sgClient.patch(`${documentPath}/addresses`, {
+        "home": {
+          "city": "Buffalo",
         },
       });
 
-      const res = await astraClient.get(documentPath);
+      const res = await sgClient.get(documentPath);
       assert.equal(res.data.addresses.home.city, "Buffalo");
     });
 
-    it("should DELETE a document", async () => {
-      const res = await astraClient.delete(documentPath);
-      assert.equal(res.status, 204);
-    });
+    //it("should DELETE a document", async () => {
+    //  const res = await sgClient.delete(documentPath);
+    //  assert.equal(res.status, 204);
+    //});
   });
 });
